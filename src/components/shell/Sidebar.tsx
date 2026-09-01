@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Sparkles, ChevronRight, ChevronLeft } from 'lucide-react';
 import { useApp } from '@/state/AppContext';
 import { NAV_SECTIONS } from '@/lib/nav';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
@@ -6,26 +8,50 @@ import { GlassSurface } from '@/components/ui/GlassSurface';
 export function Sidebar() {
   const { state, navigate } = useApp();
   const { activeSection } = state;
+  const [collapsed, setCollapsed] = useState(true);
+
+  const width = collapsed ? 64 : 208;
 
   return (
-    <GlassSurface radius="xl" className="cima-sidebar-rail" style={{ margin: '12px 0 12px 12px' }}>
-      {/* Wordmark */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '2px 8px' }}>
-        <div
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: 7,
-            background: 'radial-gradient(circle at 32% 30%, rgba(255,255,255,0.9), rgba(78,158,116,0.55))',
-            boxShadow: '0 0 10px rgba(78,158,116,0.25)',
-            flexShrink: 0,
-          }}
-        />
-        <span className="cima-display" style={{ fontSize: 14 }}>CIMA OS</span>
+    <GlassSurface
+      radius="xl"
+      className="cima-sidebar-rail"
+      style={{ margin: '12px 0 12px 12px', width, padding: collapsed ? '18px 0' : '18px 14px' }}
+    >
+      {/* Collapse handle — the circular bulge from the reference layout */}
+      <button
+        type="button"
+        className="cima-sidebar-handle cima-focusable"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      >
+        {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+      </button>
+
+      {/* Logo mark */}
+      <div
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: '50%',
+          border: '1px solid var(--cima-border-strong)',
+          background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.14), rgba(255,255,255,0.02))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+        title="CIMA OS"
+      >
+        <Sparkles size={14} strokeWidth={1.75} color="var(--cima-text-primary)" />
       </div>
 
       {/* Navigation */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }} role="navigation" aria-label="Main navigation">
+      <nav
+        style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, width: '100%', alignItems: collapsed ? 'center' : 'stretch' }}
+        role="navigation"
+        aria-label="Main navigation"
+      >
         {NAV_SECTIONS.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
@@ -35,48 +61,39 @@ export function Sidebar() {
               className="cima-focusable cima-nav-item"
               onClick={() => navigate(section.id)}
               aria-current={isActive ? 'page' : undefined}
+              title={collapsed ? section.label : undefined}
+              style={{
+                width: collapsed ? 38 : '100%',
+                height: collapsed ? 38 : undefined,
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                padding: collapsed ? 0 : '8px 10px',
+                borderRadius: collapsed ? '50%' : 'var(--radius-sm)',
+              }}
             >
               <Icon size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} />
-              <span style={{ flex: 1, lineHeight: 1 }}>{section.label}</span>
-              <span className="cima-nav-dot" aria-hidden="true" />
+              {!collapsed && <span style={{ flex: 1, lineHeight: 1, textAlign: 'left' }}>{section.label}</span>}
+              {!collapsed && <span className="cima-nav-dot" aria-hidden="true" />}
             </button>
           );
         })}
       </nav>
 
-      {/* Footer status — echoes the avatar/status circle from the reference layout */}
-      <div style={{ padding: '8px 6px 2px' }}>
-        <div style={{ height: 1, background: 'var(--cima-border)', marginBottom: 12 }} />
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: '6px 6px',
-            borderRadius: 999,
-            background: 'var(--cima-surface-1)',
-            border: '1px solid var(--cima-border)',
-          }}
-        >
-          <span
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: '50%',
-              flexShrink: 0,
-              background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12), rgba(255,255,255,0.02))',
-              border: '1px solid var(--cima-border-strong)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <StatusIndicator color="var(--cima-accent)" pulse size={7} />
-          </span>
-          <span className="cima-mono" style={{ fontSize: 10.5, color: 'var(--cima-text-tertiary)' }}>
-            Core operational
-          </span>
-        </div>
+      {/* Bottom status avatar — single circle, matches the reference exactly */}
+      <div
+        title="Core operational"
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: '50%',
+          flexShrink: 0,
+          background: 'var(--cima-surface-1)',
+          border: '1px solid var(--cima-border-strong)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <StatusIndicator color="var(--cima-text-primary)" pulse size={7} />
       </div>
     </GlassSurface>
   );

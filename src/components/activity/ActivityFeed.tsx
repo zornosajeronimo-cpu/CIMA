@@ -7,7 +7,7 @@ import { StatusIndicator } from '@/components/ui/StatusIndicator';
 export function ActivityFeed() {
   const { state } = useApp();
   const [tab, setTab] = useState<'activity' | 'executions'>('activity');
-  
+
   const activities = state.activities.slice(0, 5);
   const executions = state.executions.slice(0, 5);
 
@@ -16,25 +16,25 @@ export function ActivityFeed() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <SectionHeader eyebrow="Live" title="System Monitor" />
         <div style={{ display: 'flex', gap: 6 }}>
-          <button 
+          <button
             onClick={() => setTab('activity')}
-            style={{ 
-              background: 'transparent', border: 'none', cursor: 'pointer',
+            style={{
+              background: tab === 'activity' ? 'var(--cima-surface-2)' : 'transparent',
+              border: 'none', cursor: 'pointer',
               fontSize: 11, padding: '2px 6px', borderRadius: 4,
-              color: tab === 'activity' ? 'var(--cima-accent)' : 'var(--cima-text-tertiary)',
-              backgroundColor: tab === 'activity' ? 'rgba(78, 158, 116, 0.1)' : 'transparent',
+              color: tab === 'activity' ? 'var(--cima-text-primary)' : 'var(--cima-text-tertiary)',
               fontFamily: 'IBM Plex Mono, monospace'
             }}
           >
             ACTIVITY
           </button>
-          <button 
+          <button
             onClick={() => setTab('executions')}
-            style={{ 
-              background: 'transparent', border: 'none', cursor: 'pointer',
+            style={{
+              background: tab === 'executions' ? 'var(--cima-surface-2)' : 'transparent',
+              border: 'none', cursor: 'pointer',
               fontSize: 11, padding: '2px 6px', borderRadius: 4,
               color: tab === 'executions' ? 'var(--cima-text-primary)' : 'var(--cima-text-tertiary)',
-              backgroundColor: tab === 'executions' ? 'var(--cima-surface-2)' : 'transparent',
               fontFamily: 'IBM Plex Mono, monospace'
             }}
           >
@@ -60,10 +60,10 @@ export function ActivityFeed() {
                   <StatusIndicator
                     color={
                       a.state === 'active'
-                        ? 'var(--cima-accent)'
+                        ? 'var(--cima-text-primary)'
                         : a.state === 'queued'
                         ? 'var(--cima-text-tertiary)'
-                        : 'rgba(237,240,238,0.2)'
+                        : 'rgba(245,245,243,0.2)'
                     }
                     pulse={a.state === 'active'}
                   />

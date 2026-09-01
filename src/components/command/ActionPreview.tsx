@@ -1,8 +1,11 @@
 import { useApp } from '@/state/AppContext';
 import { GlassSurface } from '@/components/ui/GlassSurface';
-import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Eye, Pencil, Globe } from 'lucide-react';
 import type { PlannedAction } from '@/models/actionPlan';
 
+// Risk is no longer color-coded (the palette is strictly grayscale).
+// Each level gets its own icon and its own tone step instead, so the
+// meaning survives without hue.
 const RISK_LABEL: Record<string, string> = {
   read: 'Read',
   write: 'Write',
@@ -10,14 +13,26 @@ const RISK_LABEL: Record<string, string> = {
   external: 'External',
 };
 
-const RISK_COLOR: Record<string, string> = {
-  read: 'var(--cima-accent)',
-  write: 'var(--cima-amber)',
-  destructive: 'var(--cima-red)',
-  external: 'var(--cima-red)',
+const RISK_ICON: Record<string, typeof Eye> = {
+  read: Eye,
+  write: Pencil,
+  destructive: AlertTriangle,
+  external: Globe,
+};
+
+// Tone step only — darkest/dimmest = lowest attention, brightest = highest.
+// Destructive additionally gets a dashed border, not just a shade.
+const RISK_STYLE: Record<string, { color: string; border: string; dashed?: boolean }> = {
+  read:        { color: 'var(--cima-text-tertiary)',  border: 'var(--cima-border)' },
+  write:       { color: 'var(--cima-text-secondary)', border: 'var(--cima-border-strong)' },
+  external:    { color: 'var(--cima-text-secondary)', border: 'var(--cima-border-strong)' },
+  destructive: { color: 'var(--cima-text-primary)',    border: 'var(--cima-border-strong)', dashed: true },
 };
 
 function ActionRow({ action, index }: { action: PlannedAction; index: number }) {
+  const Icon = RISK_ICON[action.risk] ?? Eye;
+  const style = RISK_STYLE[action.risk] ?? RISK_STYLE.read;
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 6,
@@ -34,12 +49,13 @@ function ActionRow({ action, index }: { action: PlannedAction; index: number }) 
           </span>
         </div>
         <span style={{
+          display: 'flex', alignItems: 'center', gap: 5,
           fontSize: 10.5, fontFamily: 'IBM Plex Mono, monospace',
-          padding: '2px 8px', borderRadius: 999,
-          background: `${RISK_COLOR[action.risk]}18`,
-          color: RISK_COLOR[action.risk],
-          border: `1px solid ${RISK_COLOR[action.risk]}40`,
+          padding: '2px 9px', borderRadius: 999,
+          color: style.color,
+          border: `1px ${style.dashed ? 'dashed' : 'solid'} ${style.border}`,
         }}>
+          <Icon size={11} strokeWidth={2} />
           {RISK_LABEL[action.risk]}
         </span>
       </div>
@@ -78,7 +94,7 @@ export function ActionPreview() {
   return (
     <div className="cima-fade-in" style={{
       position: 'fixed', inset: 0, zIndex: 100,
-      background: 'rgba(6,7,6,0.82)',
+      background: 'rgba(0,0,0,0.82)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 24,
       backdropFilter: 'blur(6px)',
@@ -101,14 +117,14 @@ export function ActionPreview() {
           )}
         </div>
 
-        {/* Risk warning */}
+        {/* Risk warning — dashed border + icon carries the alert, not color */}
         {(destructiveActions > 0) && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 'var(--radius-sm)',
-            background: 'rgba(185,96,96,0.1)', border: '1px solid rgba(185,96,96,0.3)', marginBottom: 16,
+            background: 'rgba(255,255,255,0.04)', border: '1px dashed var(--cima-border-strong)', marginBottom: 16,
           }}>
-            <AlertTriangle size={14} color="var(--cima-red)" />
-            <span style={{ fontSize: 12.5, color: 'var(--cima-red)' }}>
+            <AlertTriangle size={14} color="var(--cima-text-primary)" />
+            <span style={{ fontSize: 12.5, color: 'var(--cima-text-primary)' }}>
               This plan includes a destructive action. Review carefully before confirming.
             </span>
           </div>
@@ -133,7 +149,7 @@ export function ActionPreview() {
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
               padding: '10px 16px', borderRadius: 'var(--radius-sm)',
               background: 'var(--cima-accent-dim)', border: '1px solid var(--cima-accent-line)',
-              color: 'var(--cima-accent)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              color: 'var(--cima-text-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
               transition: 'background 160ms var(--ease-quiet)',
             }}
           >

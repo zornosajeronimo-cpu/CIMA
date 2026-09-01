@@ -2,6 +2,7 @@ import { useApp } from '@/state/AppContext';
 import type { CommandState } from '@/state/reducer';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import { brain } from '@/core/brain/brain';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 const PIPELINE_STEPS: { key: CommandState | 'idle'; label: string; detail?: string }[] = [
   { key: 'thinking',             label: 'Understanding',  detail: 'Analyzing intent' },
@@ -32,6 +33,8 @@ export function ExecutionTrace() {
   const isVisible = commandState !== 'idle' || lastCompletedPlan !== null;
   if (!isVisible) return null;
 
+  const StatusIcon = commandState === 'completed' ? CheckCircle2 : commandState === 'failed' ? XCircle : Loader2;
+
   return (
     <div className="cima-fade-in" style={{ marginTop: 16 }}>
       <GlassSurface radius="md" style={{ padding: '16px 20px' }}>
@@ -43,12 +46,13 @@ export function ExecutionTrace() {
           </div>
           {commandState !== 'idle' && (
             <span style={{
+              display: 'flex', alignItems: 'center', gap: 5,
               fontSize: 10.5, fontFamily: 'IBM Plex Mono, monospace',
-              padding: '2px 8px', borderRadius: 999,
-              background: commandState === 'completed' ? 'var(--cima-accent-dim)' : commandState === 'failed' ? 'rgba(185,96,96,0.12)' : 'rgba(185,146,91,0.12)',
-              color: commandState === 'completed' ? 'var(--cima-accent)' : commandState === 'failed' ? 'var(--cima-red)' : 'var(--cima-amber)',
-              border: `1px solid ${commandState === 'completed' ? 'var(--cima-accent-line)' : commandState === 'failed' ? 'rgba(185,96,96,0.3)' : 'rgba(185,146,91,0.3)'}`,
+              padding: '2px 9px', borderRadius: 999,
+              color: 'var(--cima-text-primary)',
+              border: '1px solid var(--cima-border-strong)',
             }}>
+              <StatusIcon size={11} className={commandState !== 'completed' && commandState !== 'failed' ? 'cima-spin' : undefined} />
               {commandState}
             </span>
           )}
@@ -72,13 +76,11 @@ export function ExecutionTrace() {
                   }}>
                     <div style={{
                       width: 8, height: 8, borderRadius: '50%',
-                      background: status === 'active'
-                        ? (commandState === 'failed' ? 'var(--cima-red)' : 'var(--cima-accent)')
-                        : status === 'done'
-                        ? 'var(--cima-accent)'
+                      background: status === 'active' || status === 'done'
+                        ? 'var(--cima-text-primary)'
                         : 'var(--cima-surface-2)',
                       border: `1px solid ${status === 'pending' ? 'var(--cima-border)' : 'transparent'}`,
-                      boxShadow: status === 'active' ? `0 0 6px ${commandState === 'failed' ? 'var(--cima-red)' : 'var(--cima-accent)'}` : 'none',
+                      boxShadow: status === 'active' ? '0 0 6px rgba(255,255,255,0.5)' : 'none',
                       transition: 'all 300ms var(--ease-quiet)',
                     }} />
                     <div style={{
@@ -86,7 +88,7 @@ export function ExecutionTrace() {
                       color: status === 'active'
                         ? 'var(--cima-text-primary)'
                         : status === 'done'
-                        ? 'var(--cima-accent)'
+                        ? 'var(--cima-text-secondary)'
                         : 'var(--cima-text-tertiary)',
                     }}>
                       {step.label}
@@ -108,7 +110,7 @@ export function ExecutionTrace() {
               {lastCompletedPlan.aiMessage}
             </div>
             {lastCompletedPlan.analysis && (
-              <div style={{ fontSize: 12.5, color: 'var(--cima-text-secondary)', lineHeight: 1.6, marginBottom: 8, borderLeft: '2px solid var(--cima-accent-line)', paddingLeft: 10 }}>
+              <div style={{ fontSize: 12.5, color: 'var(--cima-text-secondary)', lineHeight: 1.6, marginBottom: 8, borderLeft: '2px solid var(--cima-border-strong)', paddingLeft: 10 }}>
                 {lastCompletedPlan.analysis}
               </div>
             )}
@@ -118,11 +120,10 @@ export function ExecutionTrace() {
                   display: 'flex', alignItems: 'center', gap: 5,
                   fontSize: 11, fontFamily: 'IBM Plex Mono, monospace',
                   padding: '3px 8px', borderRadius: 4,
-                  background: a.status === 'completed' ? 'var(--cima-accent-dim)' : 'rgba(185,96,96,0.1)',
-                  color: a.status === 'completed' ? 'var(--cima-accent)' : 'var(--cima-red)',
-                  border: `1px solid ${a.status === 'completed' ? 'var(--cima-accent-line)' : 'rgba(185,96,96,0.3)'}`,
+                  color: a.status === 'completed' ? 'var(--cima-text-primary)' : 'var(--cima-text-tertiary)',
+                  border: `1px ${a.status === 'completed' ? 'solid' : 'dashed'} var(--cima-border-strong)`,
                 }}>
-                  <span style={{ fontSize: 9 }}>{a.status === 'completed' ? '✓' : '✗'}</span>
+                  {a.status === 'completed' ? <CheckCircle2 size={10} /> : <XCircle size={10} />}
                   {a.proposal.tool}
                   {a.status !== 'completed' && a.error && (
                     <span style={{ fontSize: 10, opacity: 0.8 }}>({a.error.slice(0, 30)})</span>

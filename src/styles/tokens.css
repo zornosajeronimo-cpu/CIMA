@@ -1,38 +1,54 @@
 /* ============================================================
    CIMA OS — Design Tokens & Global Styles
-   All design values live here. No magic numbers in components.
+   Palette is intentionally monochrome: black, grays, white only —
+   no hue anywhere. Where color used to carry meaning (risk level,
+   command status) that meaning now lives in icons and motion
+   instead of hue. See ActionPreview / AIOrb / ExecutionTrace.
+
+   Font: Manrope, matched to the reference "Minimalist Web Design"
+   headline — bold, geometric, tight tracking. One family, two
+   weights of intent (UI text vs. display). IBM Plex Mono is kept
+   only for technical/data labels (tool names, params, timestamps)
+   — that's a functional choice, not a brand choice.
    ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+/* If your build already loads fonts via index.html, prefer a <link>
+   tag there instead of this @import for performance — this is a
+   drop-in fallback so the file works standalone. */
 
 :root {
   /* Background */
-  --cima-bg: #0a0b0a;
-  --cima-bg-elevated: #121412;
+  --cima-bg: #0a0a0a;
+  --cima-bg-elevated: #131313;
 
-  /* Surfaces */
+  /* Surfaces — neutral white overlays only */
   --cima-surface-1: rgba(255, 255, 255, 0.035);
   --cima-surface-2: rgba(255, 255, 255, 0.065);
 
   /* Borders */
-  --cima-border: rgba(237, 240, 238, 0.08);
-  --cima-border-strong: rgba(237, 240, 238, 0.16);
+  --cima-border: rgba(245, 245, 243, 0.09);
+  --cima-border-strong: rgba(245, 245, 243, 0.17);
 
   /* Text */
-  --cima-text-primary: #edefec;
-  --cima-text-secondary: #939a95;
-  --cima-text-tertiary: #5c625e;
+  --cima-text-primary: #f3f3f1;
+  --cima-text-secondary: #9a9a96;
+  --cima-text-tertiary: #616160;
 
-  /* Accent — green, strictly functional (AI activity/success), never decorative */
-  --cima-accent: #4e9e74;
-  --cima-accent-dim: rgba(78, 158, 116, 0.14);
-  --cima-accent-line: rgba(78, 158, 116, 0.35);
+  /* "Accent" — the brightest tone in the system. Used for the one
+     active/successful state. Not a hue: pure near-white. */
+  --cima-accent: #f5f5f3;
+  --cima-accent-dim: rgba(255, 255, 255, 0.12);
+  --cima-accent-line: rgba(255, 255, 255, 0.34);
 
-  /* Status */
-  --cima-amber: #b9925b;
-  --cima-red: #b96060;
+  /* These two names are kept for backward compatibility with
+     existing components (badges, status dots) but now map to
+     grayscale steps instead of amber/red. Meaning is carried by
+     icons alongside them, not by these tones. */
+  --cima-amber: #b8b8b3;
+  --cima-red: #86867f;
 
-  /* Radius — deliberate hierarchy, not one value on everything.
-     sm = controls, md = standard cards, lg = secondary bento cards,
-     xl = hero surfaces (command hero, sidebar rail) */
+  /* Radius — deliberate hierarchy, not one value on everything */
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 22px;
@@ -60,15 +76,13 @@
   height: 100%;
 }
 
-/* Signature background: soft monochrome spheres, fixed, low-key.
-   Echoes the orb motif used throughout the product (AIOrb, status
-   dots, avatar) — not arbitrary decoration. Kept subtle on purpose:
-   this is a tool used for hours at a time, not a landing page. */
+/* Signature background: soft monochrome spheres, fixed, low-key —
+   the orb motif from the reference, echoed at page scale. */
 .cima-root {
   position: relative;
   background: var(--cima-bg);
   color: var(--cima-text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   height: 100%;
   display: flex;
@@ -83,9 +97,9 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(560px 560px at 88% -6%, rgba(255, 255, 255, 0.05), transparent 62%),
-    radial-gradient(680px 680px at -8% 78%, rgba(78, 158, 116, 0.05), transparent 60%),
-    radial-gradient(420px 420px at 46% 108%, rgba(255, 255, 255, 0.028), transparent 65%);
+    radial-gradient(560px 560px at 90% -8%, rgba(255, 255, 255, 0.05), transparent 62%),
+    radial-gradient(620px 620px at -10% 80%, rgba(255, 255, 255, 0.035), transparent 60%),
+    radial-gradient(380px 380px at 45% 112%, rgba(255, 255, 255, 0.025), transparent 65%);
 }
 
 /* ============================================================
@@ -98,12 +112,11 @@
 }
 
 /* Display type — reserved for the CIMA wordmark and page-level
-   headlines. Bold, tight tracking, larger scale contrast against
-   body copy. Used sparingly on purpose. */
+   headlines. Bold, tight tracking, matching the reference headline. */
 .cima-display {
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.05;
+  line-height: 1.04;
 }
 
 /* ============================================================
@@ -146,8 +159,7 @@
     0 24px 48px -28px rgba(0, 0, 0, 0.65);
 }
 
-/* Hero surface — the single most elevated card on a page (command
-   center, confirmation modal). Reserve for one element per screen. */
+/* Hero surface — the single most elevated card on a page. */
 .cima-glass-hero {
   background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015) 60%);
   border: 1px solid var(--cima-border-strong);
@@ -165,16 +177,6 @@
   50%       { transform: scale(1.035); opacity: 1; }
 }
 
-@keyframes cima-rotate-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-
-@keyframes cima-rotate-slow-rev {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(-360deg); }
-}
-
 @keyframes cima-pulse-ring {
   0%   { transform: scale(0.92); opacity: 0.35; }
   70%  { opacity: 0; }
@@ -188,6 +190,16 @@
 
 .cima-fade-in {
   animation: cima-fade-in 220ms var(--ease-quiet) both;
+}
+
+@keyframes cima-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.cima-spin {
+  animation: cima-spin 900ms linear infinite;
+  display: inline-flex;
 }
 
 /* Respect motion preferences */

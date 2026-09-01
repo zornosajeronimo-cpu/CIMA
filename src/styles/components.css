@@ -66,7 +66,7 @@
 .cima-btn-primary {
   background: var(--cima-accent-dim);
   border: 1px solid var(--cima-accent-line);
-  color: var(--cima-accent);
+  color: var(--cima-text-primary);
   border-radius: var(--radius-sm);
   font-family: inherit;
   font-size: 12.5px;
@@ -76,7 +76,7 @@
   white-space: nowrap;
 }
 .cima-btn-primary:hover {
-  background: rgba(78,158,116,0.22);
+  background: rgba(255,255,255,0.2);
 }
 .cima-btn-primary:disabled {
   opacity: 0.4;
@@ -112,13 +112,17 @@
   transition: all 160ms var(--ease-quiet);
 }
 .cima-btn-danger:hover {
-  border-color: rgba(185,96,96,0.4);
-  color: var(--cima-red);
+  border-color: var(--cima-border-strong);
+  color: var(--cima-text-primary);
 }
 
+/* Badges — grayscale steps, not hues. Pair with an icon wherever
+   the badge signals risk or status; the tone alone is not the
+   whole message anymore. */
 .cima-badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   padding: 2px 9px;
   border-radius: 999px;
   font-size: 10.5px;
@@ -128,18 +132,18 @@
 }
 .cima-badge-green {
   background: var(--cima-accent-dim);
-  color: var(--cima-accent);
+  color: var(--cima-text-primary);
   border: 1px solid var(--cima-accent-line);
 }
 .cima-badge-amber {
-  background: rgba(185,146,91,0.12);
-  color: var(--cima-amber);
-  border: 1px solid rgba(185,146,91,0.3);
+  background: rgba(255,255,255,0.06);
+  color: var(--cima-text-secondary);
+  border: 1px solid var(--cima-border-strong);
 }
 .cima-badge-red {
-  background: rgba(185,96,96,0.12);
-  color: var(--cima-red);
-  border: 1px solid rgba(185,96,96,0.3);
+  background: rgba(255,255,255,0.03);
+  color: var(--cima-text-tertiary);
+  border: 1px dashed var(--cima-border-strong);
 }
 .cima-badge-neutral {
   background: var(--cima-surface-2);
@@ -227,36 +231,33 @@
 }
 
 /* ============================================================
-   Sidebar rail — floating card, not a flush panel.
-   Matches the inset-rail reference: rounded shell, generous
-   icon targets, a status "avatar" anchored at the bottom.
+   Sidebar rail — narrow icon-only rail, exact structure match:
+   logo mark, icon stack, a floating circular collapse handle at
+   mid-height, and a single circular status avatar at the bottom.
    ============================================================ */
 
 .cima-sidebar-rail {
-  width: 216px;
   flex-shrink: 0;
-  margin: 12px 0 12px 12px;
-  border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
-  padding: 18px 12px;
+  align-items: center;
+  padding: 18px 0;
   gap: 22px;
+  position: relative;
+  transition: width 220ms var(--ease-quiet);
 }
 
 .cima-nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 11px;
-  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
   color: var(--cima-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 13px;
   text-align: left;
-  cursor: pointer;
-  width: 100%;
-  font-family: inherit;
   transition: background 140ms var(--ease-quiet), color 140ms var(--ease-quiet);
 }
 .cima-nav-item:hover {
@@ -268,8 +269,8 @@
   color: var(--cima-text-primary);
 }
 .cima-nav-item[aria-current='page'] .cima-nav-dot {
-  background: var(--cima-accent);
-  box-shadow: 0 0 6px rgba(78, 158, 116, 0.6);
+  background: var(--cima-text-primary);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
 }
 .cima-nav-dot {
   width: 4px;
@@ -280,27 +281,75 @@
   transition: background 140ms var(--ease-quiet);
 }
 
-/* ============================================================
-   Bento grid — asymmetric by design. Sizes are named for role,
-   not identical tiles: one dominant card, supporting cards that
-   read as secondary at a glance.
-   ============================================================ */
-
-.cima-bento {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 14px;
-  align-items: start;
+/* Collapse toggle — the circular "handle" bulging off the rail
+   edge in the reference layout. Real affordance: expands/collapses
+   labels, not just decoration. */
+.cima-sidebar-handle {
+  position: absolute;
+  top: 50%;
+  right: -11px;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--cima-border-strong);
+  background: var(--cima-bg-elevated);
+  color: var(--cima-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 140ms var(--ease-quiet), border-color 140ms var(--ease-quiet);
+  z-index: 2;
+}
+.cima-sidebar-handle:hover {
+  color: var(--cima-text-primary);
+  border-color: var(--cima-accent-line);
 }
 
-.cima-bento-side {
+/* ============================================================
+   Card stack — subtle layered-card affordance (ClientList), pure
+   CSS depth cue, no JS.
+   ============================================================ */
+
+.cima-stack-wrap {
+  position: relative;
+}
+.cima-stack-ghost {
+  position: absolute;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--cima-border);
+  background: var(--cima-surface-1);
+  pointer-events: none;
+}
+
+/* ============================================================
+   Bento grid — asymmetric by design, matching the reference:
+   left column stacks hero + a two-card row; right column is a
+   single tall card spanning both.
+   ============================================================ */
+
+.cima-bento-main {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.cima-bento-left {
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.cima-bento-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
 @media (max-width: 900px) {
-  .cima-bento {
-    grid-template-columns: 1fr;
-  }
+  .cima-bento-main { grid-template-columns: 1fr; }
+  .cima-bento-row { grid-template-columns: 1fr; }
 }
