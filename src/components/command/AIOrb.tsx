@@ -31,13 +31,13 @@ export function AIOrb({ active }: { active?: boolean }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
       <div style={{ position: 'relative', width: 56, height: 56 }}>
-        {/* Pulse ring */}
+        {/* Pulse ring — was referencing an animation that didn't exist (cima-pulse);
+            now uses the ring keyframe already defined in tokens.css */}
         {isAnimated && (
           <div style={{
             position: 'absolute', inset: -6, borderRadius: '50%',
             border: `1px solid ${orbColor}`,
-            opacity: 0.4,
-            animation: 'cima-pulse 1.8s ease-in-out infinite',
+            animation: 'cima-pulse-ring 1.8s var(--ease-quiet) infinite',
           }} />
         )}
         {/* Core orb */}

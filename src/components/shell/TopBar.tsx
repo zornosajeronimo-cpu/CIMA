@@ -27,12 +27,11 @@ export function TopBar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '14px 28px',
-        borderBottom: '1px solid var(--cima-border)',
+        padding: '20px 32px 14px',
         flexShrink: 0,
       }}
     >
-      <span className="cima-mono" style={{ fontSize: 11, color: 'var(--cima-text-tertiary)' }}>
+      <span className="cima-display" style={{ fontSize: 17 }}>
         {activeSection.label}
       </span>
       <span className="cima-mono" style={{ fontSize: 11, color: 'var(--cima-text-tertiary)' }}>

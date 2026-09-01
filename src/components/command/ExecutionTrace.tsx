@@ -34,7 +34,7 @@ export function ExecutionTrace() {
 
   return (
     <div className="cima-fade-in" style={{ marginTop: 16 }}>
-      <GlassSurface style={{ padding: '16px 20px' }}>
+      <GlassSurface radius="md" style={{ padding: '16px 20px' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>

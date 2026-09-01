@@ -31,7 +31,7 @@ function StructuralPlaceholder({ section }: { section: NavSection }) {
       className="cima-fade-in"
       style={{ maxWidth: 680, margin: '0 auto', padding: '64px 28px' }}
     >
-      <GlassSurface style={{ padding: '36px 32px' }}>
+      <GlassSurface radius="lg" style={{ padding: '36px 32px' }}>
         <div
           className="cima-mono"
           style={{
@@ -44,9 +44,7 @@ function StructuralPlaceholder({ section }: { section: NavSection }) {
         >
           Structural — not yet built
         </div>
-        <h2
-          style={{ fontSize: 19, fontWeight: 600, margin: '0 0 10px', letterSpacing: '-0.015em' }}
-        >
+        <h2 className="cima-display" style={{ fontSize: 20, margin: '0 0 10px' }}>
           {section.label}
         </h2>
         <p

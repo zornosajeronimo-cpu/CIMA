@@ -78,19 +78,19 @@ export function ActionPreview() {
   return (
     <div className="cima-fade-in" style={{
       position: 'fixed', inset: 0, zIndex: 100,
-      background: 'rgba(10,14,12,0.85)',
+      background: 'rgba(6,7,6,0.82)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 24,
-      backdropFilter: 'blur(4px)',
+      backdropFilter: 'blur(6px)',
     }}>
-      <GlassSurface style={{ maxWidth: 540, width: '100%', padding: '28px 28px 24px' }}>
+      <GlassSurface hero radius="lg" style={{ maxWidth: 540, width: '100%', padding: '28px 28px 24px' }}>
 
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 10, fontFamily: 'IBM Plex Mono, monospace', color: 'var(--cima-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
             CIMA wants to execute
           </div>
-          <h2 style={{ fontSize: 17, fontWeight: 600, margin: 0, letterSpacing: '-0.015em' }}>
+          <h2 className="cima-display" style={{ fontSize: 18, margin: 0 }}>
             {plan.aiMessage}
           </h2>
           {plan.intent.confidence > 0 && (
@@ -128,6 +128,7 @@ export function ActionPreview() {
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           <button
             onClick={confirmPlan}
+            className="cima-focusable"
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
               padding: '10px 16px', borderRadius: 'var(--radius-sm)',
@@ -140,6 +141,7 @@ export function ActionPreview() {
           </button>
           <button
             onClick={cancelPlan}
+            className="cima-focusable"
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
               padding: '10px 16px', borderRadius: 'var(--radius-sm)',
