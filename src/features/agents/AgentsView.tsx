@@ -1,5 +1,5 @@
 import { useApp } from '@/state/AppContext';
-import { AgentStatus } from '@/models';
+import type { AgentStatus } from '@/models';
 
 function getAgentStatusColor(status: AgentStatus) {
   if (status === 'running') return 'var(--cima-amber)';

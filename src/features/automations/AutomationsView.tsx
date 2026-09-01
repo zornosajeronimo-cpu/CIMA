@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/state/AppContext';
-import { Automation } from '@/models';
+import type { Automation } from '@/models';
 
 function AutomationCard({ automation }: { automation: Automation }) {
   const { dispatch } = useApp();

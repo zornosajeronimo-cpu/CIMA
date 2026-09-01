@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '@/state/AppContext';
-import { Client, ClientStage, ClientStatus } from '@/models';
+import type { Client, ClientStage, ClientStatus } from '@/models';
 
 const STAGES: ClientStage[] = ['Discovery', 'Solution Design', 'Build', 'Live'];
 const STATUSES: ClientStatus[] = ['On track', 'Needs input', 'Blocked'];

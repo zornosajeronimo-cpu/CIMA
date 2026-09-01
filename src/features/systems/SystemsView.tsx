@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '@/state/AppContext';
-import { BusinessSystem, BusinessSystemComponent, BusinessSystemStatus } from '@/models';
+import type { BusinessSystem, BusinessSystemComponent, BusinessSystemStatus } from '@/models';
 
 const COMPONENT_TYPES = ['whatsapp', 'crm', 'database', 'ai', 'dashboard', 'notification', 'api', 'automation', 'other'] as const;
 type CompType = typeof COMPONENT_TYPES[number];

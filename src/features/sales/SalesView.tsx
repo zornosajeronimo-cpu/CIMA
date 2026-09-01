@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '@/state/AppContext';
-import { Opportunity, OpportunityStage } from '@/models';
+import type { Opportunity, OpportunityStage } from '@/models';
 
 const STAGES: OpportunityStage[] = ['Lead', 'Discovery', 'Qualified', 'Proposal', 'Negotiation', 'Won', 'Lost'];
 
