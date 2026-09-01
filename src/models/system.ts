@@ -1,4 +1,4 @@
-import type { CSSProperties, ComponentType } from 'react';
+﻿import type { CSSProperties, ComponentType } from 'react';
 
 export type SystemComponentStatus = 'operational' | 'ready' | 'standby';
 
@@ -16,5 +16,18 @@ export interface NavSection {
   structural: boolean;
 }
 
-// Future structures reserved for AI expansion (Paso 1+):
-// KnowledgeItem, Decision, Lesson, Experiment — intentionally not built yet.
+export type BusinessSystemStatus = 'Concept' | 'Design' | 'Build' | 'Live' | 'Paused';
+export interface BusinessSystemComponent {
+  name: string;
+  type: 'whatsapp' | 'crm' | 'database' | 'ai' | 'dashboard' | 'notification' | 'api' | 'automation' | 'other';
+}
+export interface BusinessSystem {
+  id: string;
+  name: string;
+  description: string;
+  clientId?: string;
+  status: BusinessSystemStatus;
+  components: BusinessSystemComponent[];
+  createdAt: string;
+  updatedAt: string;
+}

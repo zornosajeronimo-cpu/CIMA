@@ -5,9 +5,20 @@ import { NAV_SECTIONS } from '@/lib/nav';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { CommandCenter } from '@/components/command/CommandCenter';
-import { ClientView } from '@/components/clients/ClientView';
 import { GlassSurface } from '@/components/ui/GlassSurface';
 import type { NavSection } from '@/models';
+
+// Import feature views
+import { KnowledgeView } from '@/features/knowledge/KnowledgeView';
+import { ClientsView } from '@/features/clients/ClientsView';
+import { ResearchView } from '@/features/research/ResearchView';
+import { SalesView } from '@/features/sales/SalesView';
+import { DecisionsView } from '@/features/decisions/DecisionsView';
+import { LessonsView } from '@/features/lessons/LessonsView';
+import { ExperimentsView } from '@/features/experiments/ExperimentsView';
+import { SystemsView } from '@/features/systems/SystemsView';
+import { AutomationsView } from '@/features/automations/AutomationsView';
+import { AgentsView } from '@/features/agents/AgentsView';
 
 // ---------------------------------------------------------------------------
 // Structural placeholder for sections not yet built
@@ -52,23 +63,8 @@ function StructuralPlaceholder({ section }: { section: NavSection }) {
         </p>
         <button
           onClick={() => navigate('overview')}
-          className="cima-focusable"
-          style={{
-            marginTop: 22,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 6,
-            background: 'transparent',
-            border: '1px solid var(--cima-border-strong)',
-            color: 'var(--cima-text-primary)',
-            borderRadius: 999,
-            padding: '7px 16px',
-            fontSize: 12,
-            cursor: 'pointer',
-            transition: 'background 160ms var(--ease-quiet)',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--cima-surface-2)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          className="cima-focusable cima-btn-ghost"
+          style={{ marginTop: 22, display: 'inline-flex', alignItems: 'center', gap: 6 }}
         >
           Back to Overview <ArrowUpRight size={12} />
         </button>
@@ -83,22 +79,49 @@ function StructuralPlaceholder({ section }: { section: NavSection }) {
 
 export function AppShell() {
   const { state } = useApp();
-  const { activeSection, selectedClientId, clients } = state;
+  const { activeSection } = state;
 
   const activeNavSection = NAV_SECTIONS.find((s) => s.id === activeSection) ?? NAV_SECTIONS[0];
 
   // Resolve content
   let content: React.ReactNode;
 
-  // If a client is selected anywhere, show its detail view
-  if (selectedClientId) {
-    const client = clients.find((c) => c.id === selectedClientId);
-    content = client ? <ClientView client={client} /> : <CommandCenter />;
-  } else if (activeSection === 'overview') {
-    content = <CommandCenter />;
-  } else {
-    // All other sections are structural for now
-    content = <StructuralPlaceholder section={activeNavSection} />;
+  switch (activeSection) {
+    case 'overview':
+      content = <CommandCenter />;
+      break;
+    case 'knowledge':
+      content = <KnowledgeView />;
+      break;
+    case 'clients':
+      content = <ClientsView />;
+      break;
+    case 'research':
+      content = <ResearchView />;
+      break;
+    case 'sales':
+      content = <SalesView />;
+      break;
+    case 'decisions':
+      content = <DecisionsView />;
+      break;
+    case 'lessons':
+      content = <LessonsView />;
+      break;
+    case 'experiments':
+      content = <ExperimentsView />;
+      break;
+    case 'systems':
+      content = <SystemsView />;
+      break;
+    case 'automations':
+      content = <AutomationsView />;
+      break;
+    case 'agents':
+      content = <AgentsView />;
+      break;
+    default:
+      content = <StructuralPlaceholder section={activeNavSection} />;
   }
 
   return (

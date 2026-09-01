@@ -1,50 +1,40 @@
-import { useState, useRef, type KeyboardEvent } from 'react';
+import { useState, useRef, type KeyboardEvent, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useApp } from '@/state/AppContext';
 
-type InputState = 'idle' | 'focused' | 'typing' | 'submitting';
-
-/**
- * CommandInput — the primary interface for issuing commands to CIMA.
- *
- * Current behavior (Paso 0):
- *   User types → submits → activity logged → input cleared.
- *
- * Future behavior (Paso 1+):
- *   Submit → Command → CommandRouter → ContextBuilder → Brain → Tool → Result → Activity
- */
 export function CommandInput() {
-  const { submitCommand } = useApp();
+  const { state, submitCommand } = useApp();
   const [value, setValue] = useState('');
-  const [inputState, setInputState] = useState<InputState>('idle');
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const hasValue = value.trim().length > 0;
+  const isSubmitting = state.isCommandRunning;
 
-  const handleSubmit = () => {
-    if (!hasValue || inputState === 'submitting') return;
-
-    setInputState('submitting');
-    submitCommand(value.trim());
-
-    // Brief submitting flash, then reset
-    setTimeout(() => {
+  // Clear input when command finishes running successfully
+  useEffect(() => {
+    if (!isSubmitting && value && !focused) {
       setValue('');
-      setInputState('idle');
-      inputRef.current?.blur();
-    }, 280);
+    }
+  }, [isSubmitting, value, focused]);
+
+  const handleSubmit = async () => {
+    if (!hasValue || isSubmitting) return;
+    const commandText = value.trim();
+    setValue('');
+    await submitCommand(commandText);
+    inputRef.current?.blur();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') handleSubmit();
     if (e.key === 'Escape') {
       setValue('');
-      setInputState('idle');
       inputRef.current?.blur();
     }
   };
 
-  const isFocused = inputState === 'focused' || inputState === 'typing' || inputState === 'submitting';
+  const isFocused = focused || isSubmitting || hasValue;
 
   return (
     <div style={{ width: '100%', maxWidth: 520 }}>
@@ -59,23 +49,20 @@ export function CommandInput() {
           borderColor: isFocused ? 'var(--cima-border-strong)' : 'var(--cima-border)',
           transition: 'border-color 200ms var(--ease-quiet), background 200ms var(--ease-quiet)',
           background: isFocused ? 'rgba(255,255,255,0.045)' : 'var(--cima-surface-1)',
-          opacity: inputState === 'submitting' ? 0.7 : 1,
+          opacity: isSubmitting ? 0.7 : 1,
         }}
       >
         <input
           ref={inputRef}
           className="cima-focusable"
           value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setInputState(e.target.value ? 'typing' : 'focused');
-          }}
-          onFocus={() => setInputState(value ? 'typing' : 'focused')}
-          onBlur={() => setInputState('idle')}
+          onChange={(e) => setValue(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask CIMA anything…"
-          aria-label="Command input — type a command and press Enter"
-          disabled={inputState === 'submitting'}
+          placeholder={isSubmitting ? "Processing..." : "Ask CIMA anything…"}
+          aria-label="Command input"
+          disabled={isSubmitting}
           style={{
             flex: 1,
             background: 'transparent',
@@ -91,7 +78,7 @@ export function CommandInput() {
           type="button"
           className="cima-focusable"
           aria-label="Send command"
-          disabled={!hasValue || inputState === 'submitting'}
+          disabled={!hasValue || isSubmitting}
           onClick={handleSubmit}
           style={{
             width: 32,
@@ -120,7 +107,7 @@ export function CommandInput() {
           lineHeight: 1.5,
         }}
       >
-        Research, design, build and execute — arriving as CIMA grows.
+        {isSubmitting ? 'Command sent to router...' : '⏎ Enter to send, Esc to clear'}
       </p>
     </div>
   );

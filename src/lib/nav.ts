@@ -9,19 +9,23 @@ import {
   Lightbulb,
   FlaskConical,
   Archive,
+  Bot,
+  Zap,
 } from 'lucide-react';
 import type { NavSection, SystemComponent } from '@/models';
 
 export const NAV_SECTIONS: NavSection[] = [
   { id: 'overview',     label: 'Overview',     icon: Compass,       structural: false },
-  { id: 'knowledge',    label: 'Knowledge',    icon: BookOpen,      structural: true  },
+  { id: 'knowledge',    label: 'Knowledge',    icon: BookOpen,      structural: false },
   { id: 'clients',      label: 'Clients',      icon: Users,         structural: false },
-  { id: 'systems',      label: 'Systems',      icon: Layers,        structural: true  },
-  { id: 'research',     label: 'Research',     icon: Search,        structural: true  },
-  { id: 'sales',        label: 'Sales',        icon: TrendingUp,    structural: true  },
-  { id: 'decisions',    label: 'Decisions',    icon: GitBranch,     structural: true  },
-  { id: 'lessons',      label: 'Lessons',      icon: Lightbulb,     structural: true  },
-  { id: 'experiments',  label: 'Experiments',  icon: FlaskConical,  structural: true  },
+  { id: 'systems',      label: 'Systems',      icon: Layers,        structural: false },
+  { id: 'sales',        label: 'Sales',        icon: TrendingUp,    structural: false },
+  { id: 'automations',  label: 'Automations',  icon: Zap,           structural: false },
+  { id: 'agents',       label: 'Agents',       icon: Bot,           structural: false },
+  { id: 'research',     label: 'Research',     icon: Search,        structural: false },
+  { id: 'decisions',    label: 'Decisions',    icon: GitBranch,     structural: false },
+  { id: 'lessons',      label: 'Lessons',      icon: Lightbulb,     structural: false },
+  { id: 'experiments',  label: 'Experiments',  icon: FlaskConical,  structural: false },
   { id: 'archive',      label: 'Archive',      icon: Archive,       structural: true  },
 ];
 

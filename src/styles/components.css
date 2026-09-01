@@ -1,0 +1,227 @@
+/* ============================================================
+   CIMA OS — Reusable component patterns
+   ============================================================ */
+
+.cima-input {
+  width: 100%;
+  background: var(--cima-surface-1);
+  border: 1px solid var(--cima-border);
+  border-radius: var(--radius-sm);
+  color: var(--cima-text-primary);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 160ms var(--ease-quiet);
+  box-sizing: border-box;
+}
+.cima-input:focus {
+  border-color: var(--cima-border-strong);
+}
+.cima-input::placeholder {
+  color: var(--cima-text-tertiary);
+}
+
+.cima-textarea {
+  width: 100%;
+  background: var(--cima-surface-1);
+  border: 1px solid var(--cima-border);
+  border-radius: var(--radius-sm);
+  color: var(--cima-text-primary);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 160ms var(--ease-quiet);
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+.cima-textarea:focus {
+  border-color: var(--cima-border-strong);
+}
+.cima-textarea::placeholder {
+  color: var(--cima-text-tertiary);
+}
+
+.cima-select {
+  width: 100%;
+  background: var(--cima-surface-1);
+  border: 1px solid var(--cima-border);
+  border-radius: var(--radius-sm);
+  color: var(--cima-text-primary);
+  font-family: inherit;
+  font-size: 13.5px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 160ms var(--ease-quiet);
+  cursor: pointer;
+  box-sizing: border-box;
+  appearance: none;
+}
+.cima-select:focus {
+  border-color: var(--cima-border-strong);
+}
+
+.cima-btn-primary {
+  background: var(--cima-accent-dim);
+  border: 1px solid var(--cima-accent-line);
+  color: var(--cima-accent);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: all 160ms var(--ease-quiet);
+  white-space: nowrap;
+}
+.cima-btn-primary:hover {
+  background: rgba(78,158,116,0.22);
+}
+.cima-btn-primary:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.cima-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--cima-border-strong);
+  color: var(--cima-text-secondary);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: all 160ms var(--ease-quiet);
+  white-space: nowrap;
+}
+.cima-btn-ghost:hover {
+  border-color: var(--cima-accent-line);
+  color: var(--cima-text-primary);
+}
+
+.cima-btn-danger {
+  background: transparent;
+  border: 1px solid var(--cima-border);
+  color: var(--cima-text-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 160ms var(--ease-quiet);
+}
+.cima-btn-danger:hover {
+  border-color: rgba(185,96,96,0.4);
+  color: var(--cima-red);
+}
+
+.cima-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.cima-badge-green {
+  background: var(--cima-accent-dim);
+  color: var(--cima-accent);
+  border: 1px solid var(--cima-accent-line);
+}
+.cima-badge-amber {
+  background: rgba(185,146,91,0.12);
+  color: var(--cima-amber);
+  border: 1px solid rgba(185,146,91,0.3);
+}
+.cima-badge-red {
+  background: rgba(185,96,96,0.12);
+  color: var(--cima-red);
+  border: 1px solid rgba(185,96,96,0.3);
+}
+.cima-badge-neutral {
+  background: var(--cima-surface-2);
+  color: var(--cima-text-secondary);
+  border: 1px solid var(--cima-border);
+}
+
+.cima-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cima-form-label {
+  font-size: 11px;
+  color: var(--cima-text-tertiary);
+  letter-spacing: 0.03em;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+}
+
+.cima-divider {
+  height: 1px;
+  background: var(--cima-border);
+  border: none;
+  margin: var(--space-5) 0;
+}
+
+.cima-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  gap: 10px;
+}
+.cima-empty-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--cima-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cima-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cima-text-secondary);
+  margin: 0;
+}
+.cima-empty-body {
+  font-size: 13px;
+  color: var(--cima-text-tertiary);
+  max-width: 360px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.cima-view {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 28px 64px;
+}
+
+.cima-card {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--cima-border);
+  background: transparent;
+  transition: border-color 160ms var(--ease-quiet), background 160ms var(--ease-quiet);
+}
+.cima-card:hover {
+  border-color: var(--cima-border-strong);
+  background: rgba(255,255,255,0.015);
+}
+
+.cima-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  background: var(--cima-surface-2);
+  color: var(--cima-text-tertiary);
+  border: 1px solid var(--cima-border);
+}

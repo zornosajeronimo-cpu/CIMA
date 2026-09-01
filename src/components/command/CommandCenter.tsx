@@ -4,12 +4,11 @@ import { ActivityFeed } from '@/components/activity/ActivityFeed';
 import { TodayPanel } from '@/components/today/TodayPanel';
 import { ClientList } from '@/components/clients/ClientList';
 import { SystemStatus } from '@/components/system/SystemStatus';
+import { useApp } from '@/state/AppContext';
 
-/**
- * CommandCenter — the Overview / home screen.
- * All data flows from AppContext; no static arrays here.
- */
 export function CommandCenter() {
+  const { state } = useApp();
+  
   return (
     <div
       style={{
@@ -48,8 +47,21 @@ export function CommandCenter() {
           padding: '6px 0',
         }}
       >
-        <AIOrb />
+        <AIOrb active={state.isCommandRunning} />
         <CommandInput />
+        
+        {/* Command History / Demo Links */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 600 }}>
+          {state.commandHistory.slice(0, 3).map((cmd) => (
+            <div
+              key={cmd.id}
+              className="cima-badge cima-badge-neutral"
+              style={{ opacity: 0.7 }}
+            >
+              "{cmd.input}"
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Three-column grid */}
