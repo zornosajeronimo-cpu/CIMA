@@ -17,42 +17,39 @@ export class AnthropicProvider implements AIProvider {
       parameters: t.parameters,
     }));
 
-    const systemPrompt = `
-Eres CIMA OS, un sistema operativo inteligente personal para gestionar clientes, ventas, conocimiento y operaciones.
-Tu trabajo es interpretar el comando del usuario, analizar el contexto provisto y retornar un objeto JSON ESTRICTO que represente tu plan de acción.
+    const systemPrompt = request.systemPrompt ?? `
+Eres CIMA OS. Interpretas comandos y devuelves JSON.
+IDIOMA: Español.
 
-Todo tu razonamiento, análisis y mensajes deben ser SIEMPRE EN ESPAÑOL.
-
-CONTEXTO ACTUAL:
+CONTEXTO DEL SISTEMA:
 ${JSON.stringify(request.context, null, 2)}
 
-HERRAMIENTAS DISPONIBLES:
+HERRAMIENTAS:
 ${JSON.stringify(toolsDescription, null, 2)}
 
-TU RESPUESTA DEBE SER UN OBJETO JSON VÁLIDO QUE CUMPLA EXACTAMENTE ESTE ESQUEMA:
+RESPONDE CON ESTE JSON EXACTO (usa EXACTAMENTE estos nombres de campo):
 {
-  "message": "Explicación legible para el humano de lo que entendiste y vas a hacer (EN ESPAÑOL)",
+  "message": "Qué vas a hacer, en español",
   "intent": {
-    "type": "STRING enum (ej. CLIENT_VIEW, CLIENT_UPDATE, TASK_CREATE, ANALYZE, UNKNOWN)",
+    "type": "RESEARCH",
     "confidence": 0.95,
-    "entities": { "clientName": "...", "topic": "..." }
+    "entities": {}
   },
   "actions": [
     {
-      "tool": "nombreDeLaHerramienta",
-      "parameters": { "param1": "valor1" },
-      "reason": "Por qué elegiste esta herramienta (EN ESPAÑOL)"
+      "tool": "investigateCompany",
+      "parameters": {"companyName": "Ejemplo S.A.S."},
+      "reason": "Investigar la empresa solicitada"
     }
-  ],
-  "analysis": "Narrativa opcional en español si el usuario pidió un resumen o análisis."
+  ]
 }
 
-REGLAS:
-1. Retorna ÚNICAMENTE JSON válido.
-2. Solo usa herramientas explícitamente listadas en HERRAMIENTAS DISPONIBLES.
-3. Valida los tipos de los parámetros contra el esquema de la herramienta.
-4. Si no sabes qué hacer, retorna el intent UNKNOWN sin acciones.
-5. Todo texto dirigido al usuario DEBE estar en ESPAÑOL.
+IMPORTANTE:
+- Usa EXACTAMENTE los nombres: "message", "intent", "actions", "tool", "parameters", "reason"
+- "actions" siempre es un ARRAY []
+- "parameters" siempre es un OBJETO {}
+- Si no hay acción, usa "actions": []
+- Todo en ESPAÑOL
 `;
 
     const body = {
@@ -61,7 +58,7 @@ REGLAS:
       system: systemPrompt,
       messages: [
         { role: 'user', content: request.commandText },
-        { role: 'assistant', content: '{' } // Prefill to force JSON output
+        { role: 'assistant', content: '{' }
       ],
     };
 
@@ -73,7 +70,8 @@ REGLAS:
         'anthropic-version': '2023-06-01',
         'anthropic-dangerously-allow-browser': 'true'
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(60000)
     });
 
     if (!res.ok) {
@@ -92,7 +90,13 @@ REGLAS:
     candidateText = '{' + candidateText;
 
     try {
-      const parsed = JSON.parse(candidateText);
+      // Limpiar posibles bloques de markdown
+      const cleaned = candidateText
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const parsed = JSON.parse(cleaned);
       return {
         ...parsed,
         meta: {
@@ -102,8 +106,8 @@ REGLAS:
           timestamp: new Date().toISOString(),
         }
       };
-    } catch (err) {
-      throw new Error(`Error al parsear el JSON de Anthropic: ${candidateText}`);
+    } catch {
+      throw new Error(`Error al parsear el JSON de Anthropic: ${candidateText.slice(0, 300)}`);
     }
   }
 }

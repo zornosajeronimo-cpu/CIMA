@@ -34,6 +34,7 @@ export interface PlannedAction {
   idempotencyKey?: string;
   startedAt?: string;
   completedAt?: string;
+  message?: string;
   result?: Record<string, unknown>;
   error?: string;
 }

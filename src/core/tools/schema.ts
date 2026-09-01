@@ -28,6 +28,7 @@ export interface ToolDefinition {
   risk: RiskLevel;
   /** Parameter schema for validation before execution */
   parameters: Record<string, ParameterSchema>;
-  /** The actual execution logic — reads state, returns actions to dispatch */
-  execute(params: Record<string, unknown>, state: AppState): ToolResult;
+  /** The actual execution logic — reads state, returns actions to dispatch.
+   *  Can be async for tools that call external APIs (e.g. Tavily search). */
+  execute(params: Record<string, unknown>, state: AppState): ToolResult | Promise<ToolResult>;
 }

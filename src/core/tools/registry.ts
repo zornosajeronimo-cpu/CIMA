@@ -6,6 +6,7 @@
 import type { ToolDefinition } from './schema';
 import type { AppState } from '@/state/reducer';
 import type { Client, Task, KnowledgeItem, ResearchEntry, Lesson, Decision, Opportunity } from '@/models';
+import { researchAgent } from '@/core/research/researchAgent';
 
 const now = () => new Date().toISOString();
 const uid = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -15,8 +16,9 @@ const uid = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toStrin
 // ---------------------------------------------------------------------------
 
 function findClient(state: AppState, clientId: string): Client | undefined {
+  if (!clientId) return undefined;
   return state.clients.find(
-    c => c.id === clientId || c.name.toLowerCase().includes(clientId.toLowerCase())
+    c => c.id === clientId || (c.name || '').toLowerCase().includes(clientId.toLowerCase())
   );
 }
 
@@ -368,6 +370,136 @@ const analyzeClient: ToolDefinition = {
 // Registry
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Herramientas del Agente Investigador (requieren Tavily API Key)
+// ---------------------------------------------------------------------------
+
+const investigateCompany: ToolDefinition = {
+  name: 'investigateCompany',
+  description: 'Investiga una empresa en internet usando búsqueda web real. Extrae descripción, sector, tamaño, personas clave y oportunidades. Guarda el resultado como investigación y conocimiento.',
+  risk: 'write',
+  parameters: {
+    companyName: { type: 'string', required: true, description: 'Nombre de la empresa a investigar' },
+    location: { type: 'string', required: false, description: 'País o ciudad de la empresa (ej: Colombia, Bogotá)' },
+    createIfNew: { type: 'boolean', required: false, description: 'Si la empresa no existe como cliente, ¿crearla?' },
+  },
+  async execute(params, state) {
+    try {
+      const result = await researchAgent.investigateCompany(
+        params.companyName as string,
+        state,
+        {
+          location: params.location as string | undefined,
+          createIfNew: (params.createIfNew as boolean | undefined) ?? false,
+        }
+      );
+
+      const actions: import('@/state/reducer').AppAction[] = [];
+
+      // Guardar la ResearchEntry
+      if (result.stateUpdates.researchEntry) {
+        actions.push({ type: 'UPSERT_RESEARCH', payload: result.stateUpdates.researchEntry });
+      }
+
+      // Guardar los KnowledgeItems
+      if (result.stateUpdates.knowledgeItems) {
+        result.stateUpdates.knowledgeItems.forEach(ki => {
+          actions.push({ type: 'UPSERT_KNOWLEDGE', payload: ki });
+        });
+      }
+
+      // Actualizar o crear el cliente
+      if (result.stateUpdates.client) {
+        actions.push({ type: 'UPSERT_CLIENT', payload: result.stateUpdates.client as import('@/models').Client });
+      }
+
+      const summary = [
+        `Investigación de **${result.profile.companyName}** completada.`,
+        `Tamaño estimado: ${result.profile.estimatedSize}.`,
+        `Fuentes consultadas: ${result.meta.totalResults} resultados web.`,
+        result.meta.tavilyAnswer ? `Resumen: ${result.meta.tavilyAnswer.slice(0, 200)}...` : '',
+      ].filter(Boolean).join(' ');
+
+      return {
+        success: true,
+        message: summary,
+        data: {
+          profile: result.profile,
+          searchTime: result.meta.researchTimeMs,
+          sources: result.profile.sources,
+        },
+        actions,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Error al investigar "${params.companyName}": ${String(err)}`,
+        actions: [],
+      };
+    }
+  },
+};
+
+const searchNews: ToolDefinition = {
+  name: 'searchNews',
+  description: 'Busca noticias recientes sobre un tema, empresa o persona en internet.',
+  risk: 'read',
+  parameters: {
+    topic: { type: 'string', required: true, description: 'Tema, empresa o persona a buscar en noticias' },
+  },
+  async execute(params) {
+    try {
+      const result = await researchAgent.searchLatestNews(params.topic as string);
+      return {
+        success: true,
+        message: result.summary,
+        data: { summary: result.summary, sources: result.sources },
+        actions: [],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Error buscando noticias: ${String(err)}`,
+        actions: [],
+      };
+    }
+  },
+};
+
+const analyzeMarket: ToolDefinition = {
+  name: 'analyzeMarket',
+  description: 'Hace una investigación de mercado sobre una industria o sector. Identifica tendencias, competidores y oportunidades.',
+  risk: 'read',
+  parameters: {
+    industry: { type: 'string', required: true, description: 'Industria o sector a investigar (ej: logística, educación, agro)' },
+    region: { type: 'string', required: false, description: 'Región o país (default: Colombia)' },
+  },
+  async execute(params) {
+    try {
+      const result = await researchAgent.analyzeMarket(
+        params.industry as string,
+        (params.region as string | undefined) ?? 'Colombia'
+      );
+      return {
+        success: true,
+        message: result.summary,
+        data: { summary: result.summary, sources: result.sources },
+        actions: [],
+      };
+    } catch (err) {
+      return {
+        success: false,
+        message: `Error en investigación de mercado: ${String(err)}`,
+        actions: [],
+      };
+    }
+  },
+};
+
+// ===========================================================================
+// Registry Class
+// ===========================================================================
+
 class ToolRegistryClass {
   private tools = new Map<string, ToolDefinition>();
 
@@ -394,7 +526,7 @@ class ToolRegistryClass {
 
 export const ToolRegistry = new ToolRegistryClass();
 
-// Register all tools
+// Registrar todas las herramientas
 [
   navigateToSection,
   viewClient,
@@ -408,4 +540,8 @@ export const ToolRegistry = new ToolRegistryClass();
   listClients,
   listOpportunities,
   analyzeClient,
+  // Agente Investigador — búsqueda web real
+  investigateCompany,
+  searchNews,
+  analyzeMarket,
 ].forEach(t => ToolRegistry.register(t));

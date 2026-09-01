@@ -1,6 +1,6 @@
 // ============================================================
 // AI Brain — Orchestrates the full command pipeline
-// Command → Context → AI → Validate → Plan → Permissions → (Execute or Confirm)
+// Command → PreRouter → (AI si es necesario) → Validate → Plan → Execute
 // ============================================================
 
 import type { AIProvider } from '@/core/ai/provider';
@@ -18,9 +18,7 @@ const uid = (prefix: string) =>
 
 export interface BrainProcessResult {
   plan: ActionPlan;
-  /** Validation errors if any */
   validationErrors?: string[];
-  /** Audit data for observability */
   audit: {
     commandText: string;
     contextScope: string[];
@@ -32,10 +30,144 @@ export interface BrainProcessResult {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Pre-Router Determinista
+// Detecta patrones conocidos y genera planes SIN llamar a la IA.
+// Esto elimina la dependencia de Gemini para comandos predecibles.
+// ---------------------------------------------------------------------------
+interface PreRouterMatch {
+  intent: AIResponse['intent'];
+  message: string;
+  actions: AIResponse['actions'];
+  analysis?: string;
+}
+
+function preRoute(text: string): PreRouterMatch | null {
+  const lower = text.toLowerCase().trim();
+
+  // ── Investigar empresa ────────────────────────────────────
+  // "investiga plantulas de colombia", "investigar empresa X", "busca info de X"
+  const investigatePatterns = [
+    /^(?:investiga|investigar|investiga sobre|busca info(?:rmaci[oó]n)? (?:de|sobre)|analiza|analizar|research)\s+(.+)/i,
+    /^(?:que sabes de|qué sabes de|dime sobre|averigua sobre|averigua)\s+(.+)/i,
+  ];
+
+  for (const pattern of investigatePatterns) {
+    const match = lower.match(pattern);
+    if (match) {
+      const companyName = match[1]
+        .replace(/^(?:la empresa|la compañ[ií]a|el cliente|a)\s+/i, '')
+        .trim();
+      
+      if (companyName.length > 1) {
+        return {
+          intent: { type: 'RESEARCH', confidence: 1.0, entities: { companyName } },
+          message: `Iniciando investigación profunda sobre "${companyName}". Buscaré en internet su perfil corporativo, presencia en el mercado y datos clave.`,
+          actions: [{
+            tool: 'investigateCompany',
+            parameters: { companyName, createIfNew: true },
+            reason: `El usuario solicitó investigar la empresa "${companyName}"`,
+          }],
+        };
+      }
+    }
+  }
+
+  // ── Buscar noticias ───────────────────────────────────────
+  const newsPatterns = [
+    /^(?:noticias|busca noticias|noticias sobre|news)\s+(.+)/i,
+    /^(?:que hay de nuevo|qué hay de nuevo|novedades)\s+(?:de|sobre|en)\s+(.+)/i,
+  ];
+
+  for (const pattern of newsPatterns) {
+    const match = lower.match(pattern);
+    if (match) {
+      const topic = match[1].trim();
+      if (topic.length > 1) {
+        return {
+          intent: { type: 'SEARCH', confidence: 1.0, entities: { topic } },
+          message: `Buscando noticias recientes sobre "${topic}".`,
+          actions: [{
+            tool: 'searchNews',
+            parameters: { topic },
+            reason: `Buscar noticias sobre "${topic}"`,
+          }],
+        };
+      }
+    }
+  }
+
+  // ── Ver cliente ───────────────────────────────────────────
+  const viewPatterns = [
+    /^(?:ver|muestra|abre|muestrame|muéstrame|show|view)\s+(?:al?\s+)?(?:cliente\s+)?(.+)/i,
+  ];
+
+  for (const pattern of viewPatterns) {
+    const match = lower.match(pattern);
+    if (match) {
+      const clientId = match[1].trim();
+      if (clientId.length > 1) {
+        return {
+          intent: { type: 'CLIENT_VIEW', confidence: 0.9, entities: { clientId } },
+          message: `Mostrando información del cliente "${clientId}".`,
+          actions: [{
+            tool: 'viewClient',
+            parameters: { clientId },
+            reason: `Mostrar el cliente solicitado`,
+          }],
+        };
+      }
+    }
+  }
+
+  // ── Listar clientes ───────────────────────────────────────
+  if (/^(?:clientes|lista(?:r)? clientes|mis clientes|todos los clientes)/i.test(lower)) {
+    return {
+      intent: { type: 'CLIENT_LIST', confidence: 1.0, entities: {} },
+      message: 'Mostrando la lista de clientes.',
+      actions: [{
+        tool: 'listClients',
+        parameters: {},
+        reason: 'Listar todos los clientes',
+      }],
+    };
+  }
+
+  // ── Navegar ───────────────────────────────────────────────
+  const navMap: Record<string, string> = {
+    'inicio': 'overview', 'overview': 'overview', 'panel': 'overview',
+    'clientes': 'clients', 'tareas': 'tasks', 'conocimiento': 'knowledge',
+    'investigacion': 'research', 'investigación': 'research',
+    'decisiones': 'decisions', 'lecciones': 'lessons',
+    'experimentos': 'experiments', 'oportunidades': 'opportunities',
+    'ventas': 'opportunities', 'sistemas': 'systems',
+    'automatizaciones': 'automations', 'agentes': 'agents',
+  };
+
+  const navMatch = lower.match(/^(?:ir a|ve a|navega a|abre|vamos a|show)\s+(\S+)/i);
+  if (navMatch) {
+    const section = navMap[navMatch[1].trim()] ?? navMatch[1].trim();
+    return {
+      intent: { type: 'NAVIGATE', confidence: 1.0, entities: { section } },
+      message: `Navegando a ${section}.`,
+      actions: [{
+        tool: 'navigate',
+        parameters: { section },
+        reason: `Navegar a la sección solicitada`,
+      }],
+    };
+  }
+
+  // No se reconoció el patrón → dejar que la IA lo procese
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// AIBrain
+// ---------------------------------------------------------------------------
 class AIBrain {
   private provider: AIProvider = activeProvider;
 
-  /** Replace the provider at runtime — this is how we'll connect real AI later */
   setProvider(provider: AIProvider): void {
     this.provider = provider;
   }
@@ -47,53 +179,75 @@ class AIBrain {
   async process(commandText: string, commandId: string, state: AppState): Promise<BrainProcessResult> {
     const startedAt = new Date().toISOString();
     const planId = uid('plan');
-
-    // 1. Build scoped context
     const context = buildContext(commandText, state);
 
-    // 2. Call AI provider
-    const aiStartMs = Date.now();
+    // ── Paso 1: Intentar pre-routing determinista ──────────
+    const preRouted = preRoute(commandText);
+
     let aiResponse: AIResponse;
-    try {
-      aiResponse = await this.provider.process({
-        commandText,
-        context: context.data,
-        availableTools: ToolRegistry.names(),
-        systemPrompt: `You are CIMA, an intelligent operating system for building and operating AI solutions for businesses. You help the operator (the user) understand clients, organize knowledge, manage projects, and execute strategies. Always respond with structured JSON following the AIResponse schema. Available tools: ${ToolRegistry.names().join(', ')}.`,
-      });
-    } catch (err) {
-      // AI provider failure — create failed plan
-      const failedPlan: ActionPlan = {
-        id: planId,
-        commandId,
-        commandText,
-        intent: { type: 'UNKNOWN', confidence: 0, entities: {} },
-        aiMessage: `AI processing failed: ${String(err)}`,
-        actions: [],
-        status: 'failed',
-        requiresConfirmation: false,
-        createdAt: startedAt,
-      };
-      return {
-        plan: failedPlan,
-        validationErrors: [`AI provider error: ${String(err)}`],
-        audit: {
-          commandText, contextScope: context.scope, contextTokens: context.estimatedTokens,
-          aiLatencyMs: Date.now() - aiStartMs, validationPassed: false, planId, timestamp: startedAt,
+    let aiLatencyMs = 0;
+    let validationPassed = true;
+    let validationErrors: string[] = [];
+
+    if (preRouted) {
+      // El pre-router detectó el comando → no necesitamos IA
+      console.log('[CIMA Brain] Pre-router detectó:', preRouted.intent.type);
+      aiResponse = {
+        message: preRouted.message,
+        intent: preRouted.intent,
+        actions: preRouted.actions,
+        analysis: preRouted.analysis,
+        meta: {
+          modelId: 'pre-router',
+          latencyMs: 0,
+          contextTokensEstimate: 0,
+          timestamp: startedAt,
         },
       };
+    } else {
+      // ── Paso 2: Llamar a la IA para comandos no reconocidos ──
+      const aiStartMs = Date.now();
+      try {
+        aiResponse = await this.provider.process({
+          commandText,
+          context: context.data,
+          availableTools: ToolRegistry.names(),
+        });
+      } catch (err) {
+        const failedPlan: ActionPlan = {
+          id: planId,
+          commandId,
+          commandText,
+          intent: { type: 'UNKNOWN', confidence: 0, entities: {} },
+          aiMessage: `Error al procesar: ${String(err)}`,
+          actions: [],
+          status: 'failed',
+          requiresConfirmation: false,
+          createdAt: startedAt,
+        };
+        return {
+          plan: failedPlan,
+          validationErrors: [`Error del proveedor IA: ${String(err)}`],
+          audit: {
+            commandText, contextScope: context.scope, contextTokens: context.estimatedTokens,
+            aiLatencyMs: Date.now() - aiStartMs, validationPassed: false, planId, timestamp: startedAt,
+          },
+        };
+      }
+      aiLatencyMs = Date.now() - aiStartMs;
+
+      // Validar respuesta de IA
+      const validation = validateAIResponse(aiResponse);
+      aiResponse = validation.sanitized ?? aiResponse;
+      validationPassed = validation.valid;
+      validationErrors = validation.errors.map(e => `${e.field}: ${e.message}`);
     }
-    const aiLatencyMs = Date.now() - aiStartMs;
 
-    // 3. Validate AI response
-    const validation = validateAIResponse(aiResponse);
-    const sanitizedResponse = validation.sanitized ?? aiResponse;
+    // ── Paso 3: Permisos ──────────────────────────────────
+    const permResults = permissionEngine.evaluatePlan(aiResponse.actions);
 
-    // 4. Evaluate permissions for each proposed action
-    const permResults = permissionEngine.evaluatePlan(sanitizedResponse.actions);
-
-    // 5. Build PlannedActions
-    const plannedActions: PlannedAction[] = sanitizedResponse.actions.map((proposal, i) => {
+    // ── Paso 4: Construir plan ────────────────────────────
+    const plannedActions: PlannedAction[] = aiResponse.actions.map((proposal, i) => {
       const perm = permResults.results[i];
       return {
         id: uid('action'),
@@ -104,14 +258,13 @@ class AIBrain {
       };
     });
 
-    // 6. Build ActionPlan
     const plan: ActionPlan = {
       id: planId,
       commandId,
       commandText,
-      intent: sanitizedResponse.intent,
-      aiMessage: sanitizedResponse.message,
-      analysis: sanitizedResponse.analysis,
+      intent: aiResponse.intent,
+      aiMessage: aiResponse.message,
+      analysis: aiResponse.analysis,
       actions: plannedActions,
       status: permResults.requiresConfirmation ? 'awaiting_confirmation' : 'validated',
       requiresConfirmation: permResults.requiresConfirmation,
@@ -120,13 +273,13 @@ class AIBrain {
 
     return {
       plan,
-      validationErrors: validation.errors.map(e => `${e.field}: ${e.message}`),
+      validationErrors,
       audit: {
         commandText,
         contextScope: context.scope,
         contextTokens: context.estimatedTokens,
         aiLatencyMs,
-        validationPassed: validation.valid,
+        validationPassed,
         planId,
         timestamp: startedAt,
       },
@@ -134,10 +287,10 @@ class AIBrain {
   }
 
   /** Execute a validated ActionPlan against the current state */
-  executePlan(plan: ActionPlan, state: AppState): {
+  async executePlan(plan: ActionPlan, state: AppState): Promise<{
     updatedPlan: ActionPlan;
     allActions: import('@/state/reducer').AppAction[];
-  } {
+  }> {
     const allActions: import('@/state/reducer').AppAction[] = [];
     const updatedActions: PlannedAction[] = [];
 
@@ -152,7 +305,7 @@ class AIBrain {
         updatedActions.push({
           ...action,
           status: 'failed',
-          error: `Tool not found: ${action.proposal.tool}`,
+          error: `Herramienta no encontrada: ${action.proposal.tool}`,
           startedAt: new Date().toISOString(),
           completedAt: new Date().toISOString(),
         });
@@ -161,12 +314,13 @@ class AIBrain {
 
       const startedAt = new Date().toISOString();
       try {
-        const result = tool.execute(action.proposal.parameters, state);
+        const result = await tool.execute(action.proposal.parameters, state);
         const completedAt = new Date().toISOString();
         updatedActions.push({
           ...action,
           status: result.success ? 'completed' : 'failed',
           error: result.success ? undefined : result.message,
+          message: result.success ? result.message : undefined,
           result: result.data,
           startedAt,
           completedAt,

@@ -56,26 +56,26 @@ describe('ToolRegistry', () => {
 });
 
 describe('viewClient tool', () => {
-  it('finds client by id and returns navigate actions', () => {
+  it('finds client by id and returns navigate actions', async () => {
     const tool = ToolRegistry.get('viewClient')!;
-    const result = tool.execute({ clientId: 'plasticpack' }, baseState);
+    const result = await tool.execute({ clientId: 'plasticpack' }, baseState);
     expect(result.success).toBe(true);
     expect(result.actions.some(a => a.type === 'NAVIGATE')).toBe(true);
     expect(result.actions.some(a => a.type === 'SELECT_CLIENT')).toBe(true);
   });
 
-  it('fails gracefully for unknown client', () => {
+  it('fails gracefully for unknown client', async () => {
     const tool = ToolRegistry.get('viewClient')!;
-    const result = tool.execute({ clientId: 'nonexistent' }, baseState);
+    const result = await tool.execute({ clientId: 'nonexistent' }, baseState);
     expect(result.success).toBe(false);
     expect(result.actions).toHaveLength(0);
   });
 });
 
 describe('updateClient tool', () => {
-  it('updates client stage', () => {
+  it('updates client stage', async () => {
     const tool = ToolRegistry.get('updateClient')!;
-    const result = tool.execute({ clientId: 'plasticpack', stage: 'Build' }, baseState);
+    const result = await tool.execute({ clientId: 'plasticpack', stage: 'Build' }, baseState);
     expect(result.success).toBe(true);
     const upsertAction = result.actions.find(a => a.type === 'UPSERT_CLIENT');
     expect(upsertAction).toBeDefined();
@@ -84,20 +84,20 @@ describe('updateClient tool', () => {
 });
 
 describe('createTask tool', () => {
-  it('creates a task and dispatches UPSERT_TASK', () => {
+  it('creates a task and dispatches UPSERT_TASK', async () => {
     const tool = ToolRegistry.get('createTask')!;
-    const result = tool.execute({ title: 'Prepare proposal', priority: 'high' }, baseState);
+    const result = await tool.execute({ title: 'Prepare proposal', priority: 'high' }, baseState);
     expect(result.success).toBe(true);
     expect(result.actions.some(a => a.type === 'UPSERT_TASK')).toBe(true);
   });
 
-  it('is idempotent — does not create duplicate tasks', () => {
+  it('is idempotent — does not create duplicate tasks', async () => {
     const stateWithTask: AppState = {
       ...baseState,
       tasks: [{ id: 'task1', title: 'Prepare proposal', status: 'pending', priority: 'high', createdAt: '', updatedAt: '' }],
     };
     const tool = ToolRegistry.get('createTask')!;
-    const result = tool.execute({ title: 'Prepare proposal' }, stateWithTask);
+    const result = await tool.execute({ title: 'Prepare proposal' }, stateWithTask);
     expect(result.success).toBe(true);
     expect((result.data as Record<string, unknown> | undefined)?.idempotent).toBe(true);
     expect(result.actions).toHaveLength(0); // no dispatch needed
@@ -105,9 +105,9 @@ describe('createTask tool', () => {
 });
 
 describe('analyzeClient tool', () => {
-  it('returns client data with task/knowledge counts', () => {
+  it('returns client data with task/knowledge counts', async () => {
     const tool = ToolRegistry.get('analyzeClient')!;
-    const result = tool.execute({ clientId: 'plasticpack' }, baseState);
+    const result = await tool.execute({ clientId: 'plasticpack' }, baseState);
     expect(result.success).toBe(true);
     expect(result.data?.client).toBeDefined();
   });

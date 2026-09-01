@@ -96,7 +96,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const executePlan = useCallback(async (plan: ActionPlan, currentState: AppState) => {
     dispatch({ type: 'SET_COMMAND_STATE', payload: 'executing' });
 
-    const { updatedPlan, allActions } = brain.executePlan(plan, currentState);
+    const { updatedPlan, allActions } = await brain.executePlan(plan, currentState);
 
     // Dispatch all state mutations from tool execution
     allActions.forEach(a => dispatch(a));
@@ -108,6 +108,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Add activity
     const succeeded = updatedPlan.actions.filter(a => a.status === 'completed').length;
     const failed = updatedPlan.actions.filter(a => a.status === 'failed').length;
+    
+    // Actividad principal
     const activity: Activity = {
       id: `act-${Date.now()}`,
       type: 'command',
@@ -118,6 +120,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       state: updatedPlan.status === 'completed' ? 'done' : 'active',
     };
     dispatch({ type: 'ADD_ACTIVITY', payload: activity });
+
+    // Actividades secundarias por cada herramienta que arrojó resultado
+    updatedPlan.actions.forEach((a, idx) => {
+      if (a.status === 'completed' && a.message) {
+        dispatch({
+          type: 'ADD_ACTIVITY',
+          payload: {
+            id: `act-${Date.now()}-res-${idx}`,
+            type: 'system',
+            label: `✓ ${a.message}`,
+            timestamp: new Date().toISOString(),
+            state: 'done'
+          }
+        });
+      }
+    });
+
     dispatch({ type: 'SET_COMMAND_STATE', payload: updatedPlan.status === 'failed' ? 'failed' : 'completed' });
     dispatch({ type: 'SET_COMMAND_RUNNING', payload: false });
 

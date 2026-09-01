@@ -56,7 +56,7 @@ function detectScope(text: string): ContextScope[] {
 
 function findRelevantClient(text: string, state: AppState) {
   const lower = text.toLowerCase();
-  return state.clients.find(c => lower.includes(c.name.toLowerCase()) || lower.includes(c.id.toLowerCase()));
+  return state.clients.find(c => lower.includes((c.name || '').toLowerCase()) || lower.includes((c.id || '').toLowerCase()));
 }
 
 export function buildContext(commandText: string, state: AppState): BuiltContext {

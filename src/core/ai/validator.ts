@@ -90,8 +90,10 @@ export function validateAIResponse(raw: unknown): ValidationResult {
         })
       : [];
 
+    const errorMessages = errors.map(e => `${e.field}: ${e.message}`).join(', ');
+    const originalMessage = r.message ? String(r.message) : 'AI response partially invalid';
     const sanitized: AIResponse = {
-      message: (r.message as string) ?? 'AI response partially invalid',
+      message: `${originalMessage} (Errores de validación: ${errorMessages})`,
       intent: {
         type: ((r.intent as Record<string, unknown>)?.type as AIResponse['intent']['type']) ?? 'UNKNOWN',
         confidence: ((r.intent as Record<string, unknown>)?.confidence as number) ?? 0,

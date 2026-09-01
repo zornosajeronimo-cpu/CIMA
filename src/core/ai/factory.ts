@@ -26,7 +26,7 @@ function createProvider(): AIProvider {
 
       return new GeminiProvider(
         geminiKeys,
-        import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-2.5-flash'
+        import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-3.6-flash'
       );
     }
     case 'anthropic': {
