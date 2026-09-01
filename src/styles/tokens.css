@@ -1,0 +1,161 @@
+/* ============================================================
+   CIMA OS — Design Tokens & Global Styles
+   All design values live here. No magic numbers in components.
+   ============================================================ */
+
+:root {
+  /* Background */
+  --cima-bg: #101211;
+  --cima-bg-elevated: #141716;
+
+  /* Surfaces */
+  --cima-surface-1: rgba(255, 255, 255, 0.035);
+  --cima-surface-2: rgba(255, 255, 255, 0.06);
+
+  /* Borders */
+  --cima-border: rgba(237, 240, 238, 0.09);
+  --cima-border-strong: rgba(237, 240, 238, 0.16);
+
+  /* Text */
+  --cima-text-primary: #eef1ef;
+  --cima-text-secondary: #99a29d;
+  --cima-text-tertiary: #656e69;
+
+  /* Accent — green, controlled */
+  --cima-accent: #4e9e74;
+  --cima-accent-dim: rgba(78, 158, 116, 0.14);
+  --cima-accent-line: rgba(78, 158, 116, 0.35);
+
+  /* Status */
+  --cima-amber: #b9925b;
+  --cima-red: #b96060;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  /* Easing */
+  --ease-quiet: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+}
+
+/* ============================================================
+   Root application
+   ============================================================ */
+
+#root {
+  height: 100%;
+}
+
+.cima-root {
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -8%, rgba(78, 158, 116, 0.055), transparent 60%),
+    var(--cima-bg);
+  color: var(--cima-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ============================================================
+   Typography utilities
+   ============================================================ */
+
+.cima-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+
+.cima-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+.cima-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+}
+.cima-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* ============================================================
+   Focus
+   ============================================================ */
+
+.cima-focusable:focus-visible {
+  outline: 1.5px solid var(--cima-accent-line);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   Glass surfaces
+   ============================================================ */
+
+.cima-glass {
+  background: var(--cima-surface-1);
+  border: 1px solid var(--cima-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.cima-glass-raised {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--cima-border-strong);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 40px -24px rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+
+@keyframes cima-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%       { transform: scale(1.035); opacity: 1; }
+}
+
+@keyframes cima-rotate-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes cima-rotate-slow-rev {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes cima-pulse-ring {
+  0%   { transform: scale(0.92); opacity: 0.35; }
+  70%  { opacity: 0; }
+  100% { transform: scale(1.28); opacity: 0; }
+}
+
+@keyframes cima-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cima-fade-in {
+  animation: cima-fade-in 220ms var(--ease-quiet) both;
+}
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
