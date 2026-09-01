@@ -5,12 +5,12 @@ import { brain } from '@/core/brain/brain';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 const PIPELINE_STEPS: { key: CommandState | 'idle'; label: string; detail?: string }[] = [
-  { key: 'thinking',             label: 'Understanding',  detail: 'Analyzing intent' },
-  { key: 'planning',             label: 'Building plan',  detail: 'Selecting tools' },
-  { key: 'awaiting_confirmation', label: 'Waiting',       detail: 'Your approval needed' },
-  { key: 'executing',            label: 'Executing',      detail: 'Running tools' },
-  { key: 'completed',            label: 'Completed',      detail: 'State updated' },
-  { key: 'failed',               label: 'Failed',         detail: 'See error below' },
+  { key: 'thinking',             label: 'Entendiendo',    detail: 'Analizando intención' },
+  { key: 'planning',             label: 'Planificando',   detail: 'Seleccionando herramientas' },
+  { key: 'awaiting_confirmation', label: 'Esperando',      detail: 'Requiere tu aprobación' },
+  { key: 'executing',            label: 'Ejecutando',     detail: 'Corriendo herramientas' },
+  { key: 'completed',            label: 'Completado',     detail: 'Estado actualizado' },
+  { key: 'failed',               label: 'Fallido',        detail: 'Ver error abajo' },
 ];
 
 const STATE_ORDER: CommandState[] = [

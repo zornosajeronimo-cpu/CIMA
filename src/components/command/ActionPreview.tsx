@@ -7,10 +7,10 @@ import type { PlannedAction } from '@/models/actionPlan';
 // Each level gets its own icon and its own tone step instead, so the
 // meaning survives without hue.
 const RISK_LABEL: Record<string, string> = {
-  read: 'Read',
-  write: 'Write',
-  destructive: 'Destructive',
-  external: 'External',
+  read: 'Lectura',
+  write: 'Escritura',
+  destructive: 'Destructivo',
+  external: 'Externo',
 };
 
 const RISK_ICON: Record<string, typeof Eye> = {
@@ -104,15 +104,15 @@ export function ActionPreview() {
         {/* Header */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 10, fontFamily: 'IBM Plex Mono, monospace', color: 'var(--cima-text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
-            CIMA wants to execute
+            CIMA desea ejecutar
           </div>
           <h2 className="cima-display" style={{ fontSize: 18, margin: 0 }}>
             {plan.aiMessage}
           </h2>
           {plan.intent.confidence > 0 && (
             <div style={{ fontSize: 11.5, color: 'var(--cima-text-tertiary)', marginTop: 6 }}>
-              Intent: <span style={{ color: 'var(--cima-text-secondary)', fontFamily: 'IBM Plex Mono, monospace' }}>{plan.intent.type}</span>
-              {' '}· Confidence: <span style={{ color: 'var(--cima-text-secondary)' }}>{Math.round(plan.intent.confidence * 100)}%</span>
+              Intención: <span style={{ color: 'var(--cima-text-secondary)', fontFamily: 'IBM Plex Mono, monospace' }}>{plan.intent.type}</span>
+              {' '}· Confianza: <span style={{ color: 'var(--cima-text-secondary)' }}>{Math.round(plan.intent.confidence * 100)}%</span>
             </div>
           )}
         </div>
@@ -125,7 +125,7 @@ export function ActionPreview() {
           }}>
             <AlertTriangle size={14} color="var(--cima-text-primary)" />
             <span style={{ fontSize: 12.5, color: 'var(--cima-text-primary)' }}>
-              This plan includes a destructive action. Review carefully before confirming.
+              Este plan incluye una acción destructiva. Revisa cuidadosamente antes de confirmar.
             </span>
           </div>
         )}
@@ -133,7 +133,7 @@ export function ActionPreview() {
         {/* Actions */}
         <div style={{ marginBottom: 4 }}>
           <div style={{ fontSize: 11, fontFamily: 'IBM Plex Mono, monospace', color: 'var(--cima-text-tertiary)', letterSpacing: '0.05em', marginBottom: 4 }}>
-            {plan.actions.length} ACTION{plan.actions.length !== 1 ? 'S' : ''} · {writeActions} write{writeActions !== 1 ? 's' : ''}
+            {plan.actions.length} ACCI{plan.actions.length !== 1 ? 'ONES' : 'ÓN'} · {writeActions} escritura{writeActions !== 1 ? 's' : ''}
           </div>
           {plan.actions.map((action, i) => (
             <ActionRow key={action.id} action={action} index={i} />
@@ -153,7 +153,7 @@ export function ActionPreview() {
               transition: 'background 160ms var(--ease-quiet)',
             }}
           >
-            <CheckCircle size={15} /> Confirm
+            <CheckCircle size={15} /> Confirmar
           </button>
           <button
             onClick={cancelPlan}
@@ -166,7 +166,7 @@ export function ActionPreview() {
               transition: 'all 160ms var(--ease-quiet)',
             }}
           >
-            <XCircle size={15} /> Cancel
+            <XCircle size={15} /> Cancelar
           </button>
         </div>
       </GlassSurface>

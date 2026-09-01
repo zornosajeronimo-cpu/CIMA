@@ -3,12 +3,12 @@ import { useApp } from '@/state/AppContext';
 
 const STATE_LABEL: Record<string, string> = {
   idle: '',
-  thinking: 'Understanding your command...',
-  planning: 'Building action plan...',
-  awaiting_confirmation: 'Waiting for your approval',
-  executing: 'Executing...',
-  completed: 'Done',
-  failed: 'Something went wrong',
+  thinking: 'Entendiendo tu comando...',
+  planning: 'Construyendo plan de acción...',
+  awaiting_confirmation: 'Esperando tu aprobación',
+  executing: 'Ejecutando...',
+  completed: 'Completado',
+  failed: 'Algo salió mal',
 };
 
 /**

@@ -4,7 +4,7 @@
 // ============================================================
 
 import type { AIProvider } from '@/core/ai/provider';
-import { mockAI } from '@/core/ai/mockProvider';
+import { activeProvider } from '@/core/ai/factory';
 import { buildContext } from '@/core/context/contextBuilder';
 import { validateAIResponse } from '@/core/ai/validator';
 import { permissionEngine } from '@/core/permissions/engine';
@@ -33,7 +33,7 @@ export interface BrainProcessResult {
 }
 
 class AIBrain {
-  private provider: AIProvider = mockAI;
+  private provider: AIProvider = activeProvider;
 
   /** Replace the provider at runtime — this is how we'll connect real AI later */
   setProvider(provider: AIProvider): void {

@@ -60,8 +60,8 @@ export function CommandInput() {
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           onKeyDown={handleKeyDown}
-          placeholder={isSubmitting ? "Processing..." : "Ask CIMA anything…"}
-          aria-label="Command input"
+          placeholder={isSubmitting ? "Procesando..." : "Pídele algo a CIMA…"}
+          aria-label="Entrada de comando"
           disabled={isSubmitting}
           style={{
             flex: 1,
@@ -77,7 +77,7 @@ export function CommandInput() {
         <button
           type="button"
           className="cima-focusable"
-          aria-label="Send command"
+          aria-label="Enviar comando"
           disabled={!hasValue || isSubmitting}
           onClick={handleSubmit}
           style={{
@@ -107,7 +107,7 @@ export function CommandInput() {
           lineHeight: 1.5,
         }}
       >
-        {isSubmitting ? 'Command sent to router...' : '⏎ Enter to send, Esc to clear'}
+        {isSubmitting ? 'Comando enviado al router...' : '⏎ Enter para enviar, Esc para limpiar'}
       </p>
     </div>
   );

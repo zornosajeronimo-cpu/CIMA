@@ -113,7 +113,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       type: 'command',
       label: updatedPlan.status === 'completed'
         ? updatedPlan.aiMessage
-        : `Completed with ${failed} error${failed > 1 ? 's' : ''} — ${succeeded} action${succeeded !== 1 ? 's' : ''} succeeded`,
+        : `Completado con ${failed} error${failed > 1 ? 'es' : ''} — ${succeeded} acci${succeeded !== 1 ? 'ones' : 'ón'} exitosa${succeeded !== 1 ? 's' : ''}`,
       timestamp: new Date().toISOString(),
       state: updatedPlan.status === 'completed' ? 'done' : 'active',
     };
@@ -162,7 +162,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const activity: Activity = {
         id: `act-${Date.now()}`,
         type: 'system',
-        label: `Command failed: ${String(err)}`,
+        label: `El comando falló: ${String(err)}`,
         timestamp: new Date().toISOString(),
         state: 'active',
       };
@@ -191,7 +191,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const activity: Activity = {
       id: `act-${Date.now()}`,
       type: 'system',
-      label: 'Action cancelled by user',
+      label: 'Acción cancelada por el usuario',
       timestamp: new Date().toISOString(),
       state: 'done',
     };

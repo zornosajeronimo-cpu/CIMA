@@ -40,7 +40,7 @@ export function CommandCenter() {
             <header style={{ textAlign: 'center', marginBottom: 8 }}>
               <h1 className="cima-display" style={{ fontSize: 24 }}>CIMA OS</h1>
               <p style={{ fontSize: 13, color: 'var(--cima-text-secondary)', marginTop: 5 }}>
-                Personal Intelligence &amp; Operations System
+                Sistema de Inteligencia y Operaciones Personales
               </p>
             </header>
 
