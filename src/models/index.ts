@@ -1,4 +1,4 @@
-﻿export * from './client';
+export * from './client';
 export * from './task';
 export * from './activity';
 export * from './command';
@@ -12,3 +12,5 @@ export * from './opportunity';
 export * from './automation';
 export * from './agent';
 export * from './execution';
+export * from './aiResponse';
+export * from './actionPlan';

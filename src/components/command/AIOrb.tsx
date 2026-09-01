@@ -1,77 +1,65 @@
-interface AIorbProps {
-  active?: boolean;
-}
+import { useApp } from '@/state/AppContext';
 
-/**
- * AIOrb — abstract, minimal, not a chatbot avatar.
- * Precursor to IRIS. Keep it small, alive, and elegant.
- * The orb's design intentionally leaves room to evolve in Paso 1+.
- */
-export function AIOrb({ active = true }: AIorbProps) {
+const STATE_LABEL: Record<string, string> = {
+  idle: '',
+  thinking: 'Understanding your command...',
+  planning: 'Building action plan...',
+  awaiting_confirmation: 'Waiting for your approval',
+  executing: 'Executing...',
+  completed: 'Done',
+  failed: 'Something went wrong',
+};
+
+const STATE_COLOR: Record<string, string> = {
+  idle: 'var(--cima-text-tertiary)',
+  thinking: 'var(--cima-amber)',
+  planning: 'var(--cima-amber)',
+  awaiting_confirmation: 'var(--cima-accent)',
+  executing: 'var(--cima-accent)',
+  completed: 'var(--cima-accent)',
+  failed: 'var(--cima-red)',
+};
+
+export function AIOrb({ active }: { active?: boolean }) {
+  const { state } = useApp();
+  const { commandState } = state;
+
+  const isAnimated = active || (commandState !== 'idle' && commandState !== 'completed' && commandState !== 'failed');
+  const orbColor = STATE_COLOR[commandState] ?? 'var(--cima-text-tertiary)';
+  const label = STATE_LABEL[commandState];
+
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: 100,
-        height: 100,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      aria-hidden="true"
-      aria-label="CIMA intelligence core"
-    >
-      {/* Outer ambient ring */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          borderRadius: '50%',
-          border: '1px solid rgba(78,158,116,0.13)',
-          animation: 'cima-rotate-slow 24s linear infinite',
-        }}
-      >
-        <div
-          style={{
-            position: 'absolute',
-            top: -1.5,
-            left: '50%',
-            width: 3,
-            height: 3,
-            borderRadius: 999,
-            background: 'var(--cima-accent)',
-            transform: 'translateX(-50%)',
-            opacity: 0.8,
-          }}
-        />
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{ position: 'relative', width: 56, height: 56 }}>
+        {/* Pulse ring */}
+        {isAnimated && (
+          <div style={{
+            position: 'absolute', inset: -6, borderRadius: '50%',
+            border: `1px solid ${orbColor}`,
+            opacity: 0.4,
+            animation: 'cima-pulse 1.8s ease-in-out infinite',
+          }} />
+        )}
+        {/* Core orb */}
+        <div style={{
+          width: 56, height: 56, borderRadius: '50%',
+          background: isAnimated
+            ? `radial-gradient(circle at 35% 35%, ${orbColor}60, ${orbColor}18)`
+            : 'radial-gradient(circle at 35% 35%, rgba(78,158,116,0.22), rgba(78,158,116,0.06))',
+          border: `1px solid ${isAnimated ? orbColor : 'var(--cima-border-strong)'}`,
+          transition: 'all 400ms var(--ease-quiet)',
+          boxShadow: isAnimated ? `0 0 20px ${orbColor}30` : 'none',
+        }} />
       </div>
-
-      {/* Inner ring, counter-rotating */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 14,
-          borderRadius: '50%',
-          border: '1px solid rgba(237,240,238,0.06)',
-          animation: 'cima-rotate-slow-rev 18s linear infinite',
-        }}
-      />
-
-      {/* Core sphere */}
-      <div
-        style={{
-          position: 'relative',
-          width: 40,
-          height: 40,
-          borderRadius: '50%',
-          background:
-            'radial-gradient(circle at 32% 28%, rgba(150,210,180,0.88), rgba(78,158,116,0.5) 46%, rgba(78,158,116,0.1) 72%)',
-          boxShadow: active
-            ? '0 0 22px rgba(78,158,116,0.22), 0 0 2px rgba(78,158,116,0.5)'
-            : 'none',
-          animation: active ? 'cima-breathe 5s var(--ease-quiet) infinite' : 'none',
-        }}
-      />
+      {label && (
+        <div style={{
+          fontSize: 11, fontFamily: 'IBM Plex Mono, monospace',
+          color: orbColor, letterSpacing: '0.03em',
+          transition: 'color 300ms var(--ease-quiet)',
+        }}>
+          {label}
+        </div>
+      )}
     </div>
   );
 }

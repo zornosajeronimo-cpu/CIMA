@@ -1,9 +1,19 @@
-﻿import type { 
+import type { 
   Client, Task, Activity, Command,
   KnowledgeItem, ResearchEntry, Decision, Lesson, 
   Experiment, Opportunity, BusinessSystem, 
   Automation, Agent, Execution 
 } from '@/models';
+import type { ActionPlan } from '@/models/actionPlan';
+
+export type CommandState =
+  | 'idle'
+  | 'thinking'
+  | 'planning'
+  | 'awaiting_confirmation'
+  | 'executing'
+  | 'completed'
+  | 'failed';
 
 export interface AppState {
   clients: Client[];
@@ -23,7 +33,11 @@ export interface AppState {
   executions: Execution[];
   searchQuery: string;
   commandHistory: Command[];
+  // AI layer
   isCommandRunning: boolean;
+  commandState: CommandState;
+  pendingConfirmation: ActionPlan | null;
+  lastCompletedPlan: ActionPlan | null;
 }
 
 export type AppAction = 
@@ -35,6 +49,7 @@ export type AppAction =
   | { type: 'ADD_EXECUTION'; payload: Execution }
   | { type: 'UPDATE_EXECUTION'; payload: Execution }
   | { type: 'SET_COMMAND_RUNNING'; payload: boolean }
+  | { type: 'SET_COMMAND_STATE'; payload: CommandState }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'UPSERT_CLIENT'; payload: Client }
   | { type: 'DELETE_CLIENT'; payload: string }
@@ -50,7 +65,10 @@ export type AppAction =
   | { type: 'UPSERT_BUSINESS_SYSTEM'; payload: BusinessSystem }
   | { type: 'UPSERT_AUTOMATION'; payload: Automation }
   | { type: 'RUN_AUTOMATION_SIMULATION'; payload: string }
-  | { type: 'ADD_COMMAND_HISTORY'; payload: Command };
+  | { type: 'ADD_COMMAND_HISTORY'; payload: Command }
+  // AI control layer
+  | { type: 'SET_PENDING_CONFIRMATION'; payload: ActionPlan | null }
+  | { type: 'SET_LAST_COMPLETED_PLAN'; payload: ActionPlan | null };
 
 export const INITIAL_STATE: AppState = {
   clients: [],
@@ -71,6 +89,9 @@ export const INITIAL_STATE: AppState = {
   searchQuery: '',
   commandHistory: [],
   isCommandRunning: false,
+  commandState: 'idle',
+  pendingConfirmation: null,
+  lastCompletedPlan: null,
 };
 
 export function appReducer(state: AppState, action: AppAction): AppState {
@@ -97,6 +118,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     case 'SET_COMMAND_RUNNING':
       return { ...state, isCommandRunning: action.payload };
+    case 'SET_COMMAND_STATE':
+      return { ...state, commandState: action.payload };
     case 'SET_SEARCH_QUERY':
       return { ...state, searchQuery: action.payload };
     case 'UPSERT_CLIENT': {
@@ -155,6 +178,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     case 'ADD_COMMAND_HISTORY':
       return { ...state, commandHistory: [action.payload, ...state.commandHistory].slice(0, 50) };
+    case 'SET_PENDING_CONFIRMATION':
+      return { ...state, pendingConfirmation: action.payload };
+    case 'SET_LAST_COMPLETED_PLAN':
+      return { ...state, lastCompletedPlan: action.payload };
     default:
       return state;
   }
